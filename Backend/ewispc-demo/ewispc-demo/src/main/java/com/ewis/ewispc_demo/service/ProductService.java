@@ -1,9 +1,11 @@
 package com.ewis.ewispc_demo.service;
 
 import com.ewis.ewispc_demo.model.Product;
+import com.ewis.ewispc_demo.model.ProductSpecification;
 import com.ewis.ewispc_demo.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,5 +28,32 @@ public class ProductService {
     public Product save(Product product) {
         return productRepository.save(product);
     }
+
+    @Transactional
+    public Product update(Long id, Product updatedProduct) {
+        return productRepository.findById(id).map(existing -> {
+            existing.setName(updatedProduct.getName());
+            existing.setDescription(updatedProduct.getDescription());
+            existing.setImageUrl(updatedProduct.getImageUrl());
+
+            // Instead of replacing the list, clear and rebuild it
+            existing.getSpecifications().clear();
+
+            if (updatedProduct.getSpecifications() != null) {
+                for (ProductSpecification spec : updatedProduct.getSpecifications()) {
+                    spec.setProduct(existing); // important: set the back-reference!
+                    existing.getSpecifications().add(spec); // add to existing list
+                }
+            }
+
+            return productRepository.save(existing);
+        }).orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
+
+    public void delete(Long id) {
+        productRepository.deleteById(id);
+    }
+
 
 }
