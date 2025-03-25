@@ -21,20 +21,17 @@ export default function LoginForm() {
       const response = await axios.post(
         "http://localhost:8080/authenticate",
         { username, password },
-        { withCredentials: true } // Let browser handle cookie
+        { withCredentials: true } // Browser will manage the HTTP-only cookie
       );
 
       console.log("Response from backend:", response.data);
       alert("Login successful!");
 
-      // ✅ Use role sent from backend
+      // Use role sent from backend
       const role = response.data.role;
 
-      if (role === "ADMIN") {
         window.location.href = "/dashboard";
-      } else {
-        window.location.href = "/";
-      }
+    
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
       setError("Invalid username or password!");
