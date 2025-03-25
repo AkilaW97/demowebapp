@@ -5,12 +5,18 @@ import com.ewis.ewispc_demo.repository.AdminRepository;
 import com.ewis.ewispc_demo.security.JwtService;
 import com.ewis.ewispc_demo.service.AdminDetailsService;
 import com.ewis.ewispc_demo.dto.LoginRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 public class AuthController {
@@ -38,17 +44,37 @@ public class AuthController {
     }
 
     @PostMapping("/authenticate")
-    public String authenticate(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> authenticate(@RequestBody LoginRequest request, HttpServletResponse response) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
 
         if (auth.isAuthenticated()) {
-            return jwtService.generateToken(
-                    adminDetailsService.loadUserByUsername(request.username())
-            );
+            var userDetails = adminDetailsService.loadUserByUsername(request.username());
+            String token = jwtService.generateToken(userDetails);
+
+            // Set HTTP-only cookie
+            ResponseCookie cookie = ResponseCookie.from("token", token)
+                    .httpOnly(true)
+                    .secure(false) // set true in production
+                    .path("/")
+                    .maxAge(24 * 60 * 60)
+                    .sameSite("Lax")
+                    .build();
+
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+            // Return role to frontend
+            String role = userDetails.getAuthorities().stream()
+                    .findFirst()
+                    .map(authVal -> authVal.getAuthority().replace("ROLE_", ""))
+                    .orElse("USER");
+
+            return ResponseEntity.ok().body(Map.of("role", role));
         } else {
             throw new UsernameNotFoundException("Invalid credentials");
         }
     }
+
+
 }
