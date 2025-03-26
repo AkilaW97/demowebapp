@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginForm from "./components/LoginForm";
-import Dashboard from "./components/Dashboard"; 
 import DashboardHome from "./components/dashboard/DashboardHome";
 import AdminLayout from "./components/layout/AdminLayout";
+import ProductForm from "./components/products/ProductForm";
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
           path="/dashboard"
           element={
             <AdminLayout>
-              <Dashboard />
+              <DashboardHome />
             </AdminLayout>
           }
         />
@@ -21,7 +21,7 @@ function App() {
           path="/admin/products"
           element={
             <AdminLayout>
-              <div>📦 Products Page (form coming soon)</div>
+              <ProductForm />
             </AdminLayout>
           }
         />
