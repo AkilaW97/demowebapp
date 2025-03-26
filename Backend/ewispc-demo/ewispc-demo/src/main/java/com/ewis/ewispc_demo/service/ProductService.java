@@ -2,6 +2,7 @@ package com.ewis.ewispc_demo.service;
 
 import com.ewis.ewispc_demo.model.Product;
 import com.ewis.ewispc_demo.model.ProductSpecification;
+import com.ewis.ewispc_demo.repository.ProductCategoryRepository;
 import com.ewis.ewispc_demo.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ProductCategoryRepository categoryRepository;
+
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
@@ -24,10 +28,23 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
-    //tesing only
     public Product save(Product product) {
+        if (product.getCategory() != null && product.getCategory().getId() != null) {
+            var category = categoryRepository.findById(product.getCategory().getId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            product.setCategory(category); // Set managed entity
+        } else {
+            throw new RuntimeException("Product must have a category");
+        }
+
+        // set back-references for specs
+        if (product.getSpecifications() != null) {
+            product.getSpecifications().forEach(spec -> spec.setProduct(product));
+        }
+
         return productRepository.save(product);
     }
+
 
     @Transactional
     public Product update(Long id, Product updatedProduct) {
