@@ -3,6 +3,8 @@ package com.ewis.ewispc_demo.service;
 import com.ewis.ewispc_demo.model.Admin;
 import com.ewis.ewispc_demo.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
@@ -28,4 +30,6 @@ public class AdminDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Admin not found: " + username);
         }
     }
+
+
 }
