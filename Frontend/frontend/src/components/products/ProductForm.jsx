@@ -18,7 +18,9 @@ export default function ProductForm() {
   useEffect(() => {
     fetch("http://localhost:8080/categories")
       .then((res) => res.json())
-      .then((data) => setCategories(data))
+      .then((data) => {
+        setCategories(data);
+      })
       .catch((err) => {
         console.error("Failed to load categories", err);
       });
