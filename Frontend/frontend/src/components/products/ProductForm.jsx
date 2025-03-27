@@ -1,16 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function ProductForm() {
+  const [categories, setCategories] = useState([]);
+  const [categoryId, setCategoryId] = useState("");
+
   const [product, setProduct] = useState({
     name: "",
     description: "",
     imageUrl: "",
     specifications: [{ key: "", value: "" }],
   });
+
+  useEffect(() => {
+    fetch("http://localhost:8080/categories")
+      .then((res) => res.json())
+      .then((data) => setCategories(data))
+      .catch((err) => {
+        console.error("Failed to load categories", err);
+      });
+  }, []);
 
   const handleChange = (field, value) => {
     setProduct((prev) => ({ ...prev, [field]: value }));
@@ -38,11 +50,18 @@ export default function ProductForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...product,
+        category: {
+          id: Number(categoryId), // ✅ Backend expects an object with id
+        },
+      };
+
       const response = await fetch("http://localhost:8080/admin/products", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -53,6 +72,7 @@ export default function ProductForm() {
           imageUrl: "",
           specifications: [{ key: "", value: "" }],
         });
+        setCategoryId("");
       } else {
         alert("❌ Failed to save product");
       }
@@ -67,6 +87,24 @@ export default function ProductForm() {
       <h2 className="text-xl font-bold text-[#03613a]">Add New Product</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="category">Category</Label>
+          <select
+            id="category"
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className="w-full border rounded px-3 py-2 mt-1"
+            required
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="flex flex-col gap-2">
           <Label>Title</Label>
           <Input
@@ -122,12 +160,20 @@ export default function ProductForm() {
               )}
             </div>
           ))}
-          <Button type="button" variant="outline" onClick={addSpec} className="flex flex-col gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addSpec}
+            className="flex flex-col gap-2"
+          >
             + Add Spec
           </Button>
         </div>
 
-        <Button type="submit" className="bg-[#03613a] text-white hover:bg-[#024a2b]">
+        <Button
+          type="submit"
+          className="bg-[#03613a] text-white hover:bg-[#024a2b]"
+        >
           Save Product
         </Button>
       </form>

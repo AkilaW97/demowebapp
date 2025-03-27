@@ -25,6 +25,12 @@ public class ProductController {
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
     }
 
+    @GetMapping("/by-category/{categoryId}")
+    public List<Product> getProductsByCategory(@PathVariable Long categoryId) {
+        return productService.getProductsByCategoryId(categoryId);
+    }
+
+
     //testing only
     @PostMapping
     public Product addProduct(@RequestBody Product product) {
