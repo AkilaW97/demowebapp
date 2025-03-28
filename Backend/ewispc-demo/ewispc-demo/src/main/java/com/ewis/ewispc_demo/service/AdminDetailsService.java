@@ -30,6 +30,4 @@ public class AdminDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Admin not found: " + username);
         }
     }
-
-
 }

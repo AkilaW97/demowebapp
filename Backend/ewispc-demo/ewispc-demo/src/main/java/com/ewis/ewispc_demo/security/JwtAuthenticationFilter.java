@@ -33,7 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = null;
 
-// Check cookies for token
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("token".equals(cookie.getName())) {
@@ -43,28 +42,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-// If token is still null, skip auth
-        if (token == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        try {
+            if (token != null && jwtService.isTokenValid(token)) {
+                String username = jwtService.extractUsername(token);
 
-        String username = jwtService.extractUsername(token);
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = adminDetailsService.loadUserByUsername(username);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = adminDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(token)) {
-                UsernamePasswordAuthenticationToken tokenn = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                tokenn.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(tokenn);
+                    UsernamePasswordAuthenticationToken tokenn = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    tokenn.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(tokenn);
 
-                System.out.println("Authorities: " + userDetails.getAuthorities());
+                    System.out.println("Authorities: " + userDetails.getAuthorities());
+                }
             }
+        } catch (Exception e) {
+            System.out.println("JWT processing error: " + e.getMessage());
         }
-
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        String method = request.getMethod();
+
+        return path.equals("/authenticate") ||
+                path.equals("/register/admin") ||
+                path.startsWith("/products") ||
+                (method.equals("GET") && path.startsWith("/categories"));
     }
 
 }

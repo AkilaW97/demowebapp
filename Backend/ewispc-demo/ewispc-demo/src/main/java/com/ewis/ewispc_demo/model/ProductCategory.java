@@ -1,5 +1,6 @@
 package com.ewis.ewispc_demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,5 +19,6 @@ public class ProductCategory {
 
     // Optional: reverse reference
     @OneToMany(mappedBy = "category")
+    @JsonIgnore // ⛔ Ignore the reverse relationship in JSON
     private List<Product> products;
 }

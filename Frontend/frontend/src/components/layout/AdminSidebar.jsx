@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Package, Users, Settings } from "lucide-react";
+import { Home, Package, Users, Settings, CircleGauge } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard", icon: <Home size={20} /> },
-  { label: "Products", path: "/admin/products", icon: <Package size={20} /> },
+  { label: "Add Products", path: "/admin/products", icon: <Package size={20} /> },
   { label: "Users", path: "/admin/users", icon: <Users size={20} /> },
+  { label: "Add Drivers", path: "/admin/drivers", icon: <CircleGauge size={20} /> }, 
   { label: "Settings", path: "/admin/settings", icon: <Settings size={20} /> },
 ];
 

@@ -20,6 +20,13 @@ public class CategoryController {
         return categoryRepository.findAll();
     }
 
+    // Get categories by ID
+    @GetMapping("/{id}")
+    public ProductCategory getCategoryById(@PathVariable Long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found with ID: " + id));
+    }
+
     // Add new category
     @PostMapping
     public ProductCategory createCategory(@RequestBody ProductCategory category) {

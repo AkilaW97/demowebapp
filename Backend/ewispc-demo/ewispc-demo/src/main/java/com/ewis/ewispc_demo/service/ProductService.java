@@ -41,10 +41,12 @@ public class ProductService {
         if (product.getSpecifications() != null) {
             product.getSpecifications().forEach(spec -> spec.setProduct(product));
         }
-
         return productRepository.save(product);
     }
 
+    public List<Product> getByCategory(Long categoryId) {
+        return productRepository.findByCategoryId(categoryId);
+    }
 
     @Transactional
     public Product update(Long id, Product updatedProduct) {
@@ -62,18 +64,24 @@ public class ProductService {
                     existing.getSpecifications().add(spec); // add to existing list
                 }
             }
-
             return productRepository.save(existing);
         }).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
+<<<<<<< HEAD
+=======
     public List<Product> getProductsByCategoryId(Long categoryId) {
         return productRepository.findByCategoryId(categoryId);
     }
 
+>>>>>>> f1fb34269917a62217874b5e6c998fcc5f82daae
     public void delete(Long id) {
         productRepository.deleteById(id);
     }
 
+<<<<<<< HEAD
+}
+=======
 
 }
+>>>>>>> f1fb34269917a62217874b5e6c998fcc5f82daae

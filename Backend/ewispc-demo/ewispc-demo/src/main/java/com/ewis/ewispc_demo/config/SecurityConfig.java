@@ -34,10 +34,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/authenticate", "/register/admin", "/products/**").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/categories").permitAll();
+                    auth.requestMatchers(
+                            "/authenticate",
+                            "/register/admin",
+                            "/products/**",
+                            "/categories",
+                            "/categories/**"
+                    ).permitAll(); // 👈 allow GET, OPTIONS, etc.
                     auth.requestMatchers("/admin/**").hasRole("ADMIN");
-                    auth.requestMatchers("/categories/**").hasRole("ADMIN");
                     auth.anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
